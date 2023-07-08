@@ -1,6 +1,8 @@
 #include "LIS2MDL_Driver.h"
 
-#ifdef DEBUG
+//#define LIS2MDL_DEBUG
+
+#ifdef LIS2MDL_DEBUG
 #define DEBUG_PRINTER Serial
 #define DEBUG_PRINT(...)                  \
     {                                     \
@@ -55,6 +57,8 @@ bool LIS2MDL::begin()
         return false;
     }
 
+    reboot();
+    delay(10);
     Config_A_Type AConfig;
     uint8_t AConfigraw = DEFAULT_CONFIG_A;
     memcpy(&AConfig, &AConfigraw, 1);
@@ -70,7 +74,7 @@ bool LIS2MDL::begin()
     memcpy(&Config, &CConfigraw, 1);
     setConfigC(Config);
 
-    enableOffsetCancelation();
+    // enableOffsetCancelation();
 
     return true;
 }
@@ -108,8 +112,7 @@ void LIS2MDL::calibrate()
     int16_t maxY = -1000;
     int16_t X, Y, Z;
     enableOffsetCancelation(false);
-    writeXOffset(0);
-    writeYOffset(0);
+
     long printTimer = 0;
 
     // throw away some readings, the first ones seems to be erroneous
@@ -147,7 +150,7 @@ void LIS2MDL::calibrate()
 
     Serial.print("X: ");
     Serial.print(minX);
-    Serial.print(" : ");
+    Serial.print(" : "); 
     Serial.println(maxX);
     Serial.print("Y: ");
     Serial.print(minY);
@@ -234,7 +237,7 @@ void LIS2MDL::enableTempComp(bool enable)
     writeConfigA(config);
 }
 
-void LIS2MDL::rebootMemory()
+void LIS2MDL::reboot()
 {
     Config_A_Type config = readConfigA();
     config.REBOOT = 1;
@@ -338,9 +341,9 @@ Config_C_Type LIS2MDL::readConfigC()
 
 void LIS2MDL::setConfigC(Config_C_Type config)
 {
-    #ifndef ALLOW_DISABLE_I2C
+#ifndef ALLOW_DISABLE_I2C
     config.I2C_DIS = 0; // make sure I2C isnt disabled
-    #endif
+#endif
     writeByte(CFG_REG_C_ADDR, ((uint8_t *)&config));
 }
 
@@ -352,13 +355,13 @@ void LIS2MDL::enableInturruptOnPin(bool enable)
 }
 void LIS2MDL::disableI2CInterface(bool enable)
 {
-    // commented out just in case I try to call it
-    // this would be big bad
-    #ifndef ALLOW_DISABLE_I2C
+// commented out just in case I try to call it
+// this would be big bad
+#ifndef ALLOW_DISABLE_I2C
     Config_C_Type config = readConfigC();
     config.I2C_DIS = enable;
     setConfigC(config);
-    #endif
+#endif
 }
 
 void LIS2MDL::enableAvoidReadError(bool enable)

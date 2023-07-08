@@ -38,49 +38,17 @@
 #define SENSITIVITY_MGAUSS_PER_LSB 1.5
 #define COMPASS_DEVICEADDRESS 0x1E
 
-#define DEBUG
-
 //COMP_TEMP_EN | REBOOT | SOFT_RST | LP | ODR[1:0] | MD[1:0]
 #define DEFAULT_CONFIG_A 0b10001100
 
 // 0 | 0 | 0 | OFF_CANC_ONE_SHOT | INT_on_DATAOFF | Set_Freq | OFF_CANC | LPF
-#define DEFAULT_CONFIG_B 0b00000001
+#define DEFAULT_CONFIG_B 0b00000011
 
 // 0 | INT_ON_PIN | I2C_DIS | BDU | BLE | 4WSPI | Self_Test | DRDY_on_PIN
 #define DEFAULT_CONFIG_C 0b00000001
 
 #define LSB_TO_MSG 1.5
-//#define LIS2MDL_DEBUG
 
-#define DEBUG_PRINTER Serial
-
-#ifdef LIS2MDL_DEBUG
-#define DEBUG_PRINT(...)                                            \
-    {                                                               \
-        DEBUG_PRINTER.printf("[LIS2MDL(0x%02x)]: ", COMPASS_DEVICEADDRESS); \
-        DEBUG_PRINTER.print(__VA_ARGS__);                           \
-    }
-#define DEBUG_PRINTLN(...)                                          \
-    {                                                               \
-        DEBUG_PRINTER.printf("[LIS2MDL(0x%02x)]: ", COMPASS_DEVICEADDRESS); \
-        DEBUG_PRINTER.println(__VA_ARGS__);                         \
-    }
-#define DEBUG_PRINTF(...)                                           \
-    {                                                               \
-        DEBUG_PRINTER.printf("[LIS2MDL(0x%02x)]: ", COMPASS_DEVICEADDRESS); \
-        DEBUG_PRINTER.printf(__VA_ARGS__);                          \
-    }
-#else
-#define DEBUG_PRINT(...) \
-    {                    \
-    }
-#define DEBUG_PRINTLN(...) \
-    {                      \
-    }
-#define DEBUG_PRINTF(...) \
-    {                     \
-    }
-#endif
 
 // CFG_REG_A
 #pragma pack(push, 1)
@@ -225,7 +193,7 @@ public:
     Config_A_Type readConfigA();
     void writeConfigA(Config_A_Type config);
     void enableTempComp(bool enable = true);
-    void rebootMemory();
+    void reboot();
     void softReset();
     void enableLowPower(bool enable = true);
     void setODR(ODR odr);
