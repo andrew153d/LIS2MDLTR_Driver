@@ -49,6 +49,12 @@
 
 #define LSB_TO_MSG 1.5
 
+struct XYZ_struct
+{
+    float X;
+    float Y;
+    float Z;
+};
 
 // CFG_REG_A
 #pragma pack(push, 1)
@@ -170,16 +176,26 @@ class LIS2MDL
 {
 private:
     float X, Y, Z;
+    XYZ_struct lastReadMag;
+    XYZ_struct filteredMag;
+    bool filterReadings = false;
+    
 public:
+    float filter_alpha = 0.05;
+
     LIS2MDL();
 
     bool begin();
 
     void readMag(float& X, float&Y, float&Z);
+    void readMag(XYZ_struct& mag);
     void readRaw(int16_t& X, int16_t&Y, int16_t&Z);
 
     void calibrate();
-
+    void enableAvgFilter(bool enable = true);
+    inline bool getAvgFilter(){
+        return filterReadings;
+    }
     float getHeading();
 
     void writeXOffset(int16_t setVal);

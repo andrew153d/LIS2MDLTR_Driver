@@ -1,6 +1,6 @@
 #include "LIS2MDL_Driver.h"
 
-//#define LIS2MDL_DEBUG
+// #define LIS2MDL_DEBUG
 
 #ifdef LIS2MDL_DEBUG
 #define DEBUG_PRINTER Serial
@@ -97,10 +97,41 @@ void LIS2MDL::readMag(float &X, float &Y, float &Z)
     status = readStatus();
     if (status.XYZ_available)
     {
-        X = (float)readXRaw() * LSB_TO_MSG;
-        Y = (float)readYRaw() * LSB_TO_MSG;
-        Z = (float)readZRaw() * LSB_TO_MSG;
+        lastReadMag.X = (float)readXRaw() * LSB_TO_MSG;
+        lastReadMag.Y = (float)readYRaw() * LSB_TO_MSG;
+        lastReadMag.Z = (float)readZRaw() * LSB_TO_MSG;
     }
+    if (filterReadings)
+    {
+        filteredMag.X = lastReadMag.X * filter_alpha + filteredMag.X * (1 - filter_alpha);
+        filteredMag.Y = lastReadMag.Y * filter_alpha + filteredMag.Y * (1 - filter_alpha);
+        filteredMag.Z = lastReadMag.Z * filter_alpha + filteredMag.Z * (1 - filter_alpha);
+        X = filteredMag.X;
+        Y = filteredMag.Y;
+        Z = filteredMag.Z;
+    }
+    else
+    {
+        X = lastReadMag.X;
+        Y = lastReadMag.Y;
+        Z = lastReadMag.Z;
+    }
+}
+
+void LIS2MDL::readMag(XYZ_struct& mag)
+{
+    Status_type status;
+    status = readStatus();
+    if (status.XYZ_available)
+    {
+        lastReadMag.X = (float)readXRaw() * LSB_TO_MSG;
+        lastReadMag.Y = (float)readYRaw() * LSB_TO_MSG;
+        lastReadMag.Z = (float)readZRaw() * LSB_TO_MSG;
+    }
+
+     filteredMag.X = lastReadMag.X * filter_alpha + filteredMag.X * (1 - filter_alpha);
+        filteredMag.Y = lastReadMag.Y * filter_alpha + filteredMag.Y * (1 - filter_alpha);
+        filteredMag.Z = lastReadMag.Z * filter_alpha + filteredMag.Z * (1 - filter_alpha);
 }
 
 void LIS2MDL::calibrate()
@@ -150,13 +181,18 @@ void LIS2MDL::calibrate()
 
     Serial.print("X: ");
     Serial.print(minX);
-    Serial.print(" : "); 
+    Serial.print(" : ");
     Serial.println(maxX);
     Serial.print("Y: ");
     Serial.print(minY);
     Serial.print(" : ");
     Serial.println(maxY);
     Serial.println();
+}
+
+void LIS2MDL::enableAvgFilter(bool enable)
+{
+    filterReadings = enable;
 }
 
 float LIS2MDL::getHeading()
