@@ -1,4 +1,4 @@
-#include <LIS2MDL.h>
+#include <LIS2MDL_Driver.h>
 
 
 #define SDA_PIN 32
